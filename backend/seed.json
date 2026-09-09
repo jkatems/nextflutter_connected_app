@@ -1,0 +1,20 @@
+{
+  "articles": [
+    ["L'essentiel, même hors ligne", "Un carnet numérique vous accompagne partout. Consultez vos ressources une première fois : elles resteront accessibles pendant vos déplacements, même sans connexion.", "À LA UNE"],
+    ["Apprendre un peu, chaque jour", "Choisissez un sujet, réservez vingt minutes et notez une idée à mettre en pratique. La régularité transforme les petites découvertes en connaissances durables.", "APPRENTISSAGE"],
+    ["Voyager léger", "Préparez vos documents, votre itinéraire et quelques lectures avant de partir. Un téléphone chargé et des données enregistrées rendent le trajet plus serein.", "INSPIRATION"],
+    ["Une pause pour mieux repartir", "Levez les yeux, étirez-vous et éloignez-vous quelques minutes de votre écran. Une courte pause aide à retrouver son attention.", "QUOTIDIEN"]
+  ],
+  "products": [
+    ["Carnet de poche", "Un carnet à couverture souple, 96 pages pointillées pour les idées qui arrivent sans prévenir.", "8 € · PAPETERIE"],
+    ["Gourde nomade", "Une gourde réutilisable de 750 ml, pensée pour les journées de travail et les escapades.", "24 € · QUOTIDIEN"],
+    ["Lampe de lecture", "Une lumière douce et orientable pour prolonger votre lecture. Rechargeable par USB-C.", "32 € · MAISON"],
+    ["Sac week-end", "Un sac compact de 24 litres avec une poche intérieure pour garder l'essentiel à portée de main.", "59 € · VOYAGE"]
+  ],
+  "tasks": [
+    ["Préparer sa semaine", "Prenez dix minutes pour identifier vos trois priorités. Ce tableau présente des suggestions de tâches en lecture seule.", "ORGANISATION"],
+    ["Lire un article", "Découvrez une nouvelle idée dans la rubrique Explorer et prenez une note personnelle.", "DÉCOUVERTE"],
+    ["Faire une promenade", "Prévoyez une courte marche et profitez de quelques instants sans écran.", "BIEN-ÊTRE"],
+    ["Sauvegarder ses ressources", "Ouvrez les trois rubriques avec une connexion, puis essayez le mode avion : vos données restent disponibles.", "ASTUCE"]
+  ]
+}
