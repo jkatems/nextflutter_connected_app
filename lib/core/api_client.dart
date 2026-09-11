@@ -42,7 +42,14 @@ class AuthInterceptor extends Interceptor {
   final Dio dio, refreshDio;
   final SessionStore sessions;
   Future<Map<String, dynamic>>? _refreshing;
-  AuthInterceptor(this.dio, this.refreshDio, this.sessions);
+  final Future<Map<String, dynamic>> Function(Map<String, dynamic>)?
+  refreshSession;
+  AuthInterceptor(
+    this.dio,
+    this.refreshDio,
+    this.sessions, {
+    this.refreshSession,
+  });
 
   @override
   void onRequest(
@@ -63,15 +70,20 @@ class AuthInterceptor extends Interceptor {
   Future<Map<String, dynamic>> _refresh() async {
     final old = await sessions.read();
     if (old == null) throw const AppFailure('Session absente.');
-    final response = await refreshDio.post<Map<String, dynamic>>(
-      '/auth/refresh',
-      data: {'refreshToken': old['refreshToken']},
-    );
+    final Map<String, dynamic> next;
+    if (refreshSession != null) {
+      next = await refreshSession!(old);
+    } else {
+      final response = await refreshDio.post<Map<String, dynamic>>(
+        '/auth/refresh',
+        data: {'refreshToken': old['refreshToken']},
+      );
+      next = response.data!;
+    }
     final current = await sessions.read();
     if (current == null || current['refreshToken'] != old['refreshToken']) {
       throw const AppFailure('Session modifiée.');
     }
-    final next = response.data!;
     await sessions.write(next);
     return next;
   }
