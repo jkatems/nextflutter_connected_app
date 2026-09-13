@@ -55,6 +55,5 @@ __pycache__/
 *.jks
 *.keystore
 key.properties
-firebase-debug.log*
 *-debug.log
 android/.kotlin/

@@ -38,18 +38,15 @@ Dio createDio(String baseUrl) => Dio(
   ),
 );
 
+/// Injects the current access token for the Python API.
+/// On 401, one shared future refreshes concurrent requests. Replays carry a
+/// marker so another 401 cannot loop. A refresh network failure is forwarded
+/// to the repository, allowing its offline cache fallback.
 class AuthInterceptor extends Interceptor {
   final Dio dio, refreshDio;
   final SessionStore sessions;
   Future<Map<String, dynamic>>? _refreshing;
-  final Future<Map<String, dynamic>> Function(Map<String, dynamic>)?
-  refreshSession;
-  AuthInterceptor(
-    this.dio,
-    this.refreshDio,
-    this.sessions, {
-    this.refreshSession,
-  });
+  AuthInterceptor(this.dio, this.refreshDio, this.sessions);
 
   @override
   void onRequest(
@@ -70,20 +67,15 @@ class AuthInterceptor extends Interceptor {
   Future<Map<String, dynamic>> _refresh() async {
     final old = await sessions.read();
     if (old == null) throw const AppFailure('Session absente.');
-    final Map<String, dynamic> next;
-    if (refreshSession != null) {
-      next = await refreshSession!(old);
-    } else {
-      final response = await refreshDio.post<Map<String, dynamic>>(
-        '/auth/refresh',
-        data: {'refreshToken': old['refreshToken']},
-      );
-      next = response.data!;
-    }
+    final response = await refreshDio.post<Map<String, dynamic>>(
+      '/auth/refresh',
+      data: {'refreshToken': old['refreshToken']},
+    );
     final current = await sessions.read();
     if (current == null || current['refreshToken'] != old['refreshToken']) {
       throw const AppFailure('Session modifiée.');
     }
+    final next = response.data!;
     await sessions.write(next);
     return next;
   }

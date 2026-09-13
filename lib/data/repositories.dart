@@ -1,30 +1,18 @@
 import 'package:dio/dio.dart';
 import '../core/api_client.dart';
 import '../domain/models.dart';
-import 'firestore_mapper.dart';
 
 class RestContentRepository implements ContentRepository {
   final Dio dio;
   final FeedCache cache;
   final String userId;
-  final bool firestore;
-  RestContentRepository(
-    this.dio,
-    this.cache,
-    this.userId, {
-    this.firestore = false,
-  });
+  RestContentRepository(this.dio, this.cache, this.userId);
   @override
   Future<Feed> fetch(String category) async {
     final key = '$userId/$category';
     try {
       final response = await dio.get<Map<String, dynamic>>('/$category');
-      final data = firestore
-          ? decodeFirestoreFields(
-              Map<String, dynamic>.from(response.data!['fields'] as Map),
-            )
-          : response.data!;
-      final items = (data['items'] as List)
+      final items = (response.data!['items'] as List)
           .map((e) => Entry.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList();
       final now = DateTime.now();

@@ -164,5 +164,6 @@ if __name__ == '__main__':
         raise SystemExit('Configurez JWT_SECRET avec au moins 32 caractères aléatoires.')
     initialize()
     port = int(os.environ.get('PORT', '8000'))
-    print(f'Carnet API listening on port {port}', flush=True)
-    ThreadingHTTPServer(('0.0.0.0', port), Handler).serve_forever()
+    http = ThreadingHTTPServer((os.environ.get('HOST', '0.0.0.0'), port), Handler)
+    print(f'Carnet API listening on port {http.server_port}', flush=True)
+    http.serve_forever()

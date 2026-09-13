@@ -1,9 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'core/api_client.dart';
-import 'core/firebase_config.dart';
-import 'data/firebase_auth_repository.dart';
 import 'data/repositories.dart';
 import 'data/storage.dart';
 import 'presentation/app.dart';
@@ -12,21 +11,28 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await Hive.initFlutter();
-    final cache = HiveFeedCache(await Hive.openBox<String>('feeds'));
-    final sessions = SecureSessionStore(const FlutterSecureStorage());
-    final identity = createDio(FirebaseConfig.authUrl);
-    final tokens = createDio(FirebaseConfig.refreshUrl);
-    final dio = createDio(FirebaseConfig.dataUrl);
-    final auth = FirebaseAuthRepository(identity, tokens, sessions, cache);
-    dio.interceptors.add(
-      AuthInterceptor(dio, tokens, sessions, refreshSession: auth.refresh),
+    final baseUrl = const String.fromEnvironment('API_BASE_URL').isNotEmpty
+        ? const String.fromEnvironment('API_BASE_URL')
+        : Platform.isAndroid
+        ? 'http://10.0.2.2:8000'
+        : 'http://127.0.0.1:8000';
+    final namespace = Uri.encodeComponent(baseUrl);
+    final cache = HiveFeedCache(
+      await Hive.openBox<String>('python_feeds_$namespace'),
     );
+    final sessions = SecureSessionStore(
+      const FlutterSecureStorage(),
+      namespace: namespace,
+    );
+    final public = createDio(baseUrl);
+    final dio = createDio(baseUrl);
+    dio.interceptors.add(AuthInterceptor(dio, public, sessions));
+    final auth = AuthRepository(public, dio, sessions, cache);
     final session = await auth.restore();
     runApp(
       CarnetApp(
         auth: auth,
-        repositoryFor: (id) =>
-            RestContentRepository(dio, cache, id, firestore: true),
+        repositoryFor: (id) => RestContentRepository(dio, cache, id),
         initialSession: session,
       ),
     );
@@ -38,7 +44,7 @@ Future<void> main() async {
             child: Padding(
               padding: EdgeInsets.all(32),
               child: Text(
-                'Impossible d’initialiser l’application. Vérifiez le stockage disponible puis relancez-la.',
+                'Le stockage local est indisponible. Fermez puis relancez l’application.',
               ),
             ),
           ),

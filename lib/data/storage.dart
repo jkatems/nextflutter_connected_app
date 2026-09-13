@@ -5,18 +5,21 @@ import '../domain/models.dart';
 
 class SecureSessionStore implements SessionStore {
   final FlutterSecureStorage storage;
-  SecureSessionStore(this.storage);
+  // Isolate sessions by API origin: user IDs may overlap between servers.
+  final String namespace;
+  SecureSessionStore(this.storage, {this.namespace = 'python-v1'});
+  String get _key => 'session/$namespace';
   @override
   Future<Map<String, dynamic>?> read() async {
-    final value = await storage.read(key: 'session');
+    final value = await storage.read(key: _key);
     return value == null ? null : jsonDecode(value) as Map<String, dynamic>;
   }
 
   @override
   Future<void> write(Map<String, dynamic> session) =>
-      storage.write(key: 'session', value: jsonEncode(session));
+      storage.write(key: _key, value: jsonEncode(session));
   @override
-  Future<void> clear() => storage.delete(key: 'session');
+  Future<void> clear() => storage.delete(key: _key);
 }
 
 class HiveFeedCache implements FeedCache {

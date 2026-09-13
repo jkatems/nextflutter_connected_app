@@ -12,11 +12,16 @@ jobs:
           flutter-version: '3.41.9'
           channel: stable
           cache: true
-      - run: flutter pub get
-      - run: dart format --output=none --set-exit-if-changed lib test scripts
-      - run: flutter analyze
-      - run: flutter test
       - uses: actions/setup-python@v5
         with:
           python-version: '3.14'
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed lib test scripts
+      - run: flutter analyze
+      - run: flutter test --coverage
       - run: python -m unittest discover -s backend -v
+      - run: python scripts/check_coverage.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flutter-coverage
+          path: coverage/lcov.info
