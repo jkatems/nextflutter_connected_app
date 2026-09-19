@@ -1,8 +1,31 @@
-# Carnet — Flutter + API REST Python
+# Projet Flutter — App connectée avec backend réel
 
 [![Vérifications](https://github.com/jkatems/nextflutter_connected_app/actions/workflows/ci.yml/badge.svg)](https://github.com/jkatems/nextflutter_connected_app/actions/workflows/ci.yml)
 
 Application mobile Android/iOS en français : authentification JWT, trois rubriques alimentées par une API HTTP persistante et consultation hors ligne avec Hive.
+
+**Nom de l’application : Carnet.** Le client est développé avec Flutter ; le backend réel utilise Python et une base SQLite persistante.
+
+## Exigences du projet : fichiers et lignes de code
+
+Le tableau relie les exigences fonctionnelles et techniques décrites dans ce README à leur implémentation. Les numéros de ligne correspondent à la version actuelle des sources ; ils peuvent changer après une modification du code. Les chemins sont relatifs au dossier contenant ce README et `pubspec.yaml`.
+
+| Exigence | Fichiers et lignes de code | Réalisation |
+| --- | --- | --- |
+| Application Flutter connectée à un backend réel | [`lib/main.dart`, lignes 10–38](lib/main.dart#L10-L38) ; [`backend/server.py`, lignes 162–169](backend/server.py#L162-L169) | Initialisation du client et démarrage d’un serveur HTTP Python. |
+| Persistance des données côté serveur | [`backend/server.py`, lignes 20–38](backend/server.py#L20-L38) ; [`backend/seed.json`](backend/seed.json) | Tables SQLite pour les utilisateurs, les sessions et les ressources ; insertion des données initiales. |
+| Inscription et connexion réelles | [`lib/data/repositories.dart`, lignes 61–86](lib/data/repositories.dart#L61-L86) ; [`backend/server.py`, lignes 126–144](backend/server.py#L126-L144) | Envoi des formulaires à l’API, création du compte et vérification des identifiants. |
+| Validation des formulaires | [`lib/presentation/app.dart`, lignes 180–233](lib/presentation/app.dart#L180-L233) ; [`backend/server.py`, lignes 127–135](backend/server.py#L127-L135) | Contrôles du nom, de l’email et du mot de passe côté client et serveur. |
+| Authentification JWT et renouvellement de session | [`lib/core/api_client.dart`, lignes 45–115](lib/core/api_client.dart#L45-L115) ; [`backend/server.py`, lignes 145–151](backend/server.py#L145-L151) | Injection du Bearer token, refresh partagé entre requêtes concurrentes et nouvelle tentative limitée. |
+| Protection des identifiants et des routes | [`lib/data/storage.dart`, lignes 6–23](lib/data/storage.dart#L6-L23) ; [`backend/server.py`, lignes 43–59](backend/server.py#L43-L59) et [78–94](backend/server.py#L78-L94) | Stockage sécurisé des tokens, hachage scrypt des mots de passe et contrôle de la session serveur. |
+| Trois rubriques alimentées par l’API | [`lib/presentation/app.dart`, lignes 349–391](lib/presentation/app.dart#L349-L391) ; [`lib/data/repositories.dart`, lignes 11–23](lib/data/repositories.dart#L11-L23) ; [`backend/server.py`, lignes 158–159](backend/server.py#L158-L159) | Explorer, Catalogue et Tâches chargent respectivement `/articles`, `/products` et `/tasks`. |
+| Écran de détail | [`lib/presentation/app.dart`, à partir de la ligne 594](lib/presentation/app.dart#L594) | Affichage du contenu sélectionné, également disponible depuis le cache. |
+| Cache local persistant et consultation hors ligne | [`lib/data/storage.dart`, lignes 25–39](lib/data/storage.dart#L25-L39) ; [`lib/data/repositories.dart`, lignes 11–37](lib/data/repositories.dart#L11-L37) | Écriture dans Hive après chargement ; lecture du cache en cas de panne réseau ou d’erreur serveur 5xx. |
+| Isolation du cache et restauration de session | [`lib/main.dart`, lignes 19–36](lib/main.dart#L19-L36) ; [`lib/data/repositories.dart`, ligne 12](lib/data/repositories.dart#L12) et [59](lib/data/repositories.dart#L59) | Stockage séparé par URL d’API et identifiant utilisateur ; restauration de la session locale au démarrage. |
+| États de chargement, erreurs et actualisation | [`lib/presentation/app.dart`, lignes 411–505](lib/presentation/app.dart#L411-L505) ; [`lib/core/api_client.dart`, lignes 4–29](lib/core/api_client.dart#L4-L29) | Indicateur de chargement, messages en français, bouton Réessayer, glissement pour actualiser et date des données. |
+| Déconnexion et nettoyage local | [`lib/data/repositories.dart`, lignes 91–102](lib/data/repositories.dart#L91-L102) ; [`backend/server.py`, lignes 153–155](backend/server.py#L153-L155) | Révocation serveur lorsque le réseau est disponible ; suppression locale de la session et du cache. |
+| Séparation des responsabilités | [`lib/domain/models.dart`, lignes 38–62](lib/domain/models.dart#L38-L62) ; [`lib/main.dart`, lignes 27–38](lib/main.dart#L27-L38) | Contrats du domaine, repositories de données et injection des dépendances dans la présentation. |
+| Tests automatisés et intégration réelle | [`test/repository_test.dart`, à partir de la ligne 69](test/repository_test.dart#L69) ; [`test/auth_widget_test.dart`, à partir de la ligne 52](test/auth_widget_test.dart#L52) ; [`test/cache_persistence_test.dart`, à partir de la ligne 11](test/cache_persistence_test.dart#L11) ; [`test/python_api_integration_test.dart`, à partir de la ligne 12](test/python_api_integration_test.dart#L12) ; [`backend/test_api.py`, à partir de la ligne 47](backend/test_api.py#L47) | Vérification des repositories, des formulaires, de Hive sur disque et du parcours HTTP avec Python et SQLite. |
 
 ## Fonctionnalités
 
@@ -17,7 +40,7 @@ Application mobile Android/iOS en français : authentification JWT, trois rubriq
 
 Les rubriques sont en lecture seule. Les données éditoriales initiales sont fournies dans `backend/seed.json`, insérées dans SQLite, puis servies par une véritable API REST. Aucun service tiers ni faux endpoint d’inscription n’est utilisé. Le serveur doit être lancé localement ou hébergé pour utiliser l’application en ligne.
 
-## Démarrage rapide
+## Comment lancer l’application
 
 Prérequis : Flutter **3.41.9** / Dart **3.11.5**, Python **3.11+** avec SQLite, Android SDK et Java 17 ou 21 pour Android. La compilation iOS nécessite macOS, Xcode et la configuration de signature Apple.
 
@@ -28,7 +51,11 @@ git clone https://github.com/jkatems/nextflutter_connected_app.git
 cd nextflutter_connected_app
 ```
 
-Depuis ce dossier, lancez l’API dans un premier terminal :
+Si vous utilisez l’espace de travail `app_back` fourni, entrez plutôt dans `carnet` avec `cd carnet`. Dans les deux cas, toutes les commandes suivantes doivent être exécutées depuis le dossier contenant `pubspec.yaml`, `lib/` et `backend/`.
+
+### 1. Lancer le backend réel
+
+Depuis ce dossier, lancez l’API dans un premier terminal (commandes Bash, Linux/macOS) :
 
 ```bash
 export JWT_SECRET="$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')"
@@ -37,12 +64,27 @@ python3 backend/server.py
 
 Gardez la même valeur `JWT_SECRET` entre les redémarrages pour conserver les sessions. N’incluez jamais cette valeur dans Git. Le serveur refuse une clé de moins de 32 caractères. Par défaut, il écoute sur le port 8000 et stocke ses données dans `carnet.sqlite3` du répertoire courant. Aucune dépendance Python à installer.
 
-Dans un second terminal :
+### 2. Vérifier que l’API répond
+
+Dans un second terminal, exécutez :
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+Résultat attendu : `{"status": "ok"}`. Laissez le premier terminal ouvert pendant l’utilisation de l’application.
+
+### 3. Lancer le client Flutter
+
+Dans le second terminal, placez-vous dans le même dossier de projet. Démarrez un émulateur Android ou branchez un téléphone avec le débogage USB activé, puis exécutez :
 
 ```bash
 flutter pub get
+flutter devices
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
 ```
+
+Cette commande cible l’API depuis un émulateur Android. Adaptez l’URL selon le tableau ci-dessous. Si plusieurs appareils sont disponibles, ajoutez `-d IDENTIFIANT_APPAREIL` à `flutter run`, avec l’identifiant affiché par `flutter devices`. Dans le terminal Flutter, `r` effectue un hot reload et `q` quitte l’exécution ; `Ctrl+C` arrête le backend dans son terminal.
 
 Créez un compte depuis **Nouveau ici ? Créer un compte**, avec un nom de 2 à 80 caractères, un email valide et un mot de passe de 8 à 128 caractères. Aucun compte ou mot de passe prédéfini.
 
@@ -132,6 +174,34 @@ Le serveur fourni est destiné à une démonstration et à un déploiement contr
 ## Tests et preuves de fonctionnement
 
 Les tests sont versionnés dans [`test/`](test/) et [`backend/test_api.py`](backend/test_api.py). Python doit être installé avant de lancer la suite Flutter : un test démarre réellement le serveur en arrière-plan sur un port libre et le nettoie à la fin.
+
+### Lancer les tests
+
+Depuis le dossier contenant `pubspec.yaml` (`carnet/` dans cet espace de travail), lancez :
+
+```bash
+flutter pub get
+flutter test --concurrency=2
+python3 -m unittest discover -s backend -v
+```
+
+Les tests ne nécessitent ni émulateur ni démarrage manuel de l’API. Les tests HTTP créent leur propre serveur, leur secret de test et leur base temporaire. Une exécution réussie se termine par `All tests passed!` pour Flutter et `OK` pour Python.
+
+Pour lancer uniquement le parcours Flutter → API Python → SQLite → cache hors ligne :
+
+```bash
+flutter test test/python_api_integration_test.dart
+```
+
+Pour tester uniquement les formulaires et leurs interactions :
+
+```bash
+flutter test test/auth_widget_test.dart
+```
+
+### Vérifications complètes, couverture et compilation Android
+
+Après `flutter pub get`, exécutez les commandes suivantes. La dernière commande nécessite l’environnement Android indiqué dans les prérequis ; l’APK obtenu se trouve dans `build/app/outputs/flutter-apk/app-debug.apk`.
 
 ```bash
 dart format --output=none --set-exit-if-changed lib test scripts
