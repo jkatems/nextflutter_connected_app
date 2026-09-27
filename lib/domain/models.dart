@@ -28,11 +28,39 @@ class Feed {
   const Feed(this.items, this.cached, this.savedAt);
 }
 
+enum FailureKind {
+  network,
+  unauthorized,
+  forbidden,
+  invalidData,
+  storage,
+  unknown,
+}
+
 class AppFailure implements Exception {
   final String message;
-  const AppFailure(this.message);
+  final FailureKind kind;
+  const AppFailure(this.message, {this.kind = FailureKind.unknown});
   @override
   String toString() => message;
+}
+
+/// Validate an API session before saving credentials or accepting a refresh.
+Map<String, dynamic> parseSession(Object? value) {
+  if (value is! Map<String, dynamic> ||
+      value['accessToken'] is! String ||
+      (value['accessToken'] as String).isEmpty ||
+      value['refreshToken'] is! String ||
+      (value['refreshToken'] as String).isEmpty ||
+      value['user'] is! Map ||
+      value['user']['id'] is! int ||
+      value['user']['name'] is! String) {
+    throw const AppFailure(
+      'La session reçue du serveur est invalide.',
+      kind: FailureKind.invalidData,
+    );
+  }
+  return value;
 }
 
 abstract interface class ContentRepository {

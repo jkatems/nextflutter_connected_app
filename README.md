@@ -12,20 +12,24 @@ Le tableau relie les exigences fonctionnelles et techniques décrites dans ce RE
 
 | Exigence | Fichiers et lignes de code | Réalisation |
 | --- | --- | --- |
-| Application Flutter connectée à un backend réel | [`lib/main.dart`, lignes 10–38](lib/main.dart#L10-L38) ; [`backend/server.py`, lignes 162–169](backend/server.py#L162-L169) | Initialisation du client et démarrage d’un serveur HTTP Python. |
-| Persistance des données côté serveur | [`backend/server.py`, lignes 20–38](backend/server.py#L20-L38) ; [`backend/seed.json`](backend/seed.json) | Tables SQLite pour les utilisateurs, les sessions et les ressources ; insertion des données initiales. |
-| Inscription et connexion réelles | [`lib/data/repositories.dart`, lignes 61–86](lib/data/repositories.dart#L61-L86) ; [`backend/server.py`, lignes 126–144](backend/server.py#L126-L144) | Envoi des formulaires à l’API, création du compte et vérification des identifiants. |
-| Validation des formulaires | [`lib/presentation/app.dart`, lignes 180–233](lib/presentation/app.dart#L180-L233) ; [`backend/server.py`, lignes 127–135](backend/server.py#L127-L135) | Contrôles du nom, de l’email et du mot de passe côté client et serveur. |
-| Authentification JWT et renouvellement de session | [`lib/core/api_client.dart`, lignes 45–115](lib/core/api_client.dart#L45-L115) ; [`backend/server.py`, lignes 145–151](backend/server.py#L145-L151) | Injection du Bearer token, refresh partagé entre requêtes concurrentes et nouvelle tentative limitée. |
-| Protection des identifiants et des routes | [`lib/data/storage.dart`, lignes 6–23](lib/data/storage.dart#L6-L23) ; [`backend/server.py`, lignes 43–59](backend/server.py#L43-L59) et [78–94](backend/server.py#L78-L94) | Stockage sécurisé des tokens, hachage scrypt des mots de passe et contrôle de la session serveur. |
-| Trois rubriques alimentées par l’API | [`lib/presentation/app.dart`, lignes 349–391](lib/presentation/app.dart#L349-L391) ; [`lib/data/repositories.dart`, lignes 11–23](lib/data/repositories.dart#L11-L23) ; [`backend/server.py`, lignes 158–159](backend/server.py#L158-L159) | Explorer, Catalogue et Tâches chargent respectivement `/articles`, `/products` et `/tasks`. |
-| Écran de détail | [`lib/presentation/app.dart`, à partir de la ligne 594](lib/presentation/app.dart#L594) | Affichage du contenu sélectionné, également disponible depuis le cache. |
-| Cache local persistant et consultation hors ligne | [`lib/data/storage.dart`, lignes 25–39](lib/data/storage.dart#L25-L39) ; [`lib/data/repositories.dart`, lignes 11–37](lib/data/repositories.dart#L11-L37) | Écriture dans Hive après chargement ; lecture du cache en cas de panne réseau ou d’erreur serveur 5xx. |
-| Isolation du cache et restauration de session | [`lib/main.dart`, lignes 19–36](lib/main.dart#L19-L36) ; [`lib/data/repositories.dart`, ligne 12](lib/data/repositories.dart#L12) et [59](lib/data/repositories.dart#L59) | Stockage séparé par URL d’API et identifiant utilisateur ; restauration de la session locale au démarrage. |
-| États de chargement, erreurs et actualisation | [`lib/presentation/app.dart`, lignes 411–505](lib/presentation/app.dart#L411-L505) ; [`lib/core/api_client.dart`, lignes 4–29](lib/core/api_client.dart#L4-L29) | Indicateur de chargement, messages en français, bouton Réessayer, glissement pour actualiser et date des données. |
-| Déconnexion et nettoyage local | [`lib/data/repositories.dart`, lignes 91–102](lib/data/repositories.dart#L91-L102) ; [`backend/server.py`, lignes 153–155](backend/server.py#L153-L155) | Révocation serveur lorsque le réseau est disponible ; suppression locale de la session et du cache. |
-| Séparation des responsabilités | [`lib/domain/models.dart`, lignes 38–62](lib/domain/models.dart#L38-L62) ; [`lib/main.dart`, lignes 27–38](lib/main.dart#L27-L38) | Contrats du domaine, repositories de données et injection des dépendances dans la présentation. |
-| Tests automatisés et intégration réelle | [`test/repository_test.dart`, à partir de la ligne 69](test/repository_test.dart#L69) ; [`test/auth_widget_test.dart`, à partir de la ligne 52](test/auth_widget_test.dart#L52) ; [`test/cache_persistence_test.dart`, à partir de la ligne 11](test/cache_persistence_test.dart#L11) ; [`test/python_api_integration_test.dart`, à partir de la ligne 12](test/python_api_integration_test.dart#L12) ; [`backend/test_api.py`, à partir de la ligne 47](backend/test_api.py#L47) | Vérification des repositories, des formulaires, de Hive sur disque et du parcours HTTP avec Python et SQLite. |
+| Application Flutter et backend réel | [`lib/main.dart`, ligne 10](lib/main.dart#L10) ; [`backend/server.py`, ligne 162](backend/server.py#L162) | Initialisation du client et du serveur HTTP. |
+| Persistance serveur | [`backend/server.py`, ligne 29](backend/server.py#L29) | Tables SQLite des utilisateurs, sessions et ressources ; données initiales dans `backend/seed.json`. |
+| Inscription et connexion | [`lib/data/repositories.dart`, ligne 96](lib/data/repositories.dart#L96) ; [`backend/server.py`, ligne 126](backend/server.py#L126) | Création réelle du compte, vérification des identifiants et sauvegarde de session. |
+| Validation des formulaires | [`lib/presentation/app.dart`, ligne 89](lib/presentation/app.dart#L89) ; [`backend/server.py`, ligne 127](backend/server.py#L127) | Contrôles du nom, de l’email et du mot de passe côté client et serveur. |
+| JWT et refresh token | [`lib/core/api_client.dart`, ligne 53](lib/core/api_client.dart#L53) ; [`backend/server.py`, ligne 145](backend/server.py#L145) | Bearer token, rotation du refresh et nouvelle tentative limitée ; vérification du compte et des données de session. |
+| Stockage sécurisé et routes protégées | [`lib/data/storage.dart`, ligne 6](lib/data/storage.dart#L6) ; [`backend/server.py`, ligne 43](backend/server.py#L43) ; [`backend/server.py`, ligne 79](backend/server.py#L79) | Tokens dans le stockage sécurisé ; mots de passe hachés ; session contrôlée côté serveur. |
+| Trois rubriques REST | [`lib/presentation/app.dart`, ligne 301](lib/presentation/app.dart#L301) ; [`lib/data/repositories.dart`, ligne 11](lib/data/repositories.dart#L11) ; [`backend/server.py`, ligne 158](backend/server.py#L158) | Explorer, Catalogue et Tâches consultent leurs endpoints dédiés. |
+| Écran de détail | [`lib/presentation/app.dart`, ligne 584](lib/presentation/app.dart#L584) | Affichage du contenu sélectionné, également disponible depuis le cache. |
+| Cache persistant et mode hors ligne | [`lib/data/storage.dart`, ligne 25](lib/data/storage.dart#L25) ; [`lib/data/repositories.dart`, ligne 54](lib/data/repositories.dart#L54) | Hive sur disque ; repli en cas de panne réseau ou 5xx, jamais pour masquer un refus 401/403. |
+| Isolation et restauration | [`lib/main.dart`, ligne 19](lib/main.dart#L19) ; [`lib/data/repositories.dart`, ligne 12](lib/data/repositories.dart#L12) ; [`lib/data/repositories.dart`, ligne 83](lib/data/repositories.dart#L83) | Stockage séparé par serveur et utilisateur ; validation de la session restaurée. |
+| Gestion d’état dédiée | [`lib/presentation/controllers.dart`, ligne 5](lib/presentation/controllers.dart#L5) ; [`lib/presentation/controllers.dart`, ligne 82](lib/presentation/controllers.dart#L82) ; [`lib/presentation/app.dart`, ligne 20](lib/presentation/app.dart#L20) | Provider et ChangeNotifier : session, chargement, erreurs, requêtes concurrentes et cycle de vie. |
+| Erreurs explicites et retry | [`lib/domain/models.dart`, ligne 31](lib/domain/models.dart#L31) ; [`lib/core/api_client.dart`, ligne 13](lib/core/api_client.dart#L13) ; [`lib/presentation/app.dart`, ligne 417](lib/presentation/app.dart#L417) | Erreurs typées ; bouton Réessayer ; actualisation par glissement et date des données. |
+| Déconnexion et nettoyage | [`lib/data/repositories.dart`, ligne 134](lib/data/repositories.dart#L134) ; [`backend/server.py`, ligne 153](backend/server.py#L153) | Révocation serveur et tentative des deux nettoyages locaux, y compris après un échec du stockage sécurisé. |
+| Architecture en couches | [`lib/domain/models.dart`, ligne 66](lib/domain/models.dart#L66) ; [`lib/main.dart`, ligne 30](lib/main.dart#L30) | Contrats du domaine, repositories de données et contrôleurs de présentation injectés. |
+| Tests unitaires des repositories | [`test/repository_test.dart`, ligne 8](test/repository_test.dart#L8) ; [`test/repository_resilience_test.dart`, ligne 29](test/repository_resilience_test.dart#L29) | 25 tests : cas nominaux, cache, erreurs HTTP/stockage et renouvellement de session. |
+| Tests de gestion d’état | [`test/controllers_test.dart`, ligne 40](test/controllers_test.dart#L40) ; [`test/auth_widget_test.dart`, ligne 54](test/auth_widget_test.dart#L54) | Contrôleurs et formulaires : erreurs, retry, double soumission, navigation et déconnexion. |
+| Intégration réelle et persistance | [`test/python_api_integration_test.dart`, ligne 11](test/python_api_integration_test.dart#L11) ; [`test/cache_persistence_test.dart`, ligne 11](test/cache_persistence_test.dart#L11) ; [`backend/test_api.py`, ligne 11](backend/test_api.py#L11) | HTTP, Python, SQLite et Hive réels ; rotation, révocation et réouverture hors ligne. |
+| CI et livraison Android | [`.github/workflows/ci.yml`, ligne 5](.github/workflows/ci.yml#L5) ; [`scripts/check_coverage.py`, ligne 7](scripts/check_coverage.py#L7) | Analyse, tests, seuil de couverture de 80 % et artefact APK debug après validation. |
 
 ## Fonctionnalités
 
@@ -110,6 +114,23 @@ Sur un téléphone physique, autorisez le port 8000 dans le pare-feu du PC. Andr
 
 `API_BASE_URL` est fixé à la compilation : reconstruisez l’application après un changement. Le serveur lit les variables d’environnement du terminal ; il ne charge pas automatiquement de fichier `.env`. La publication du code sur GitHub n’héberge pas le serveur Python.
 
+### Configuration backend réutilisable
+
+Un modèle sans secret est fourni dans [`backend/.env.example`](backend/.env.example). Pour éviter de changer de clé à chaque ouverture du terminal :
+
+1. Copiez le modèle avec `cp backend/.env.example backend/.env`.
+2. Générez une clé avec `python3 -c 'import secrets; print(secrets.token_urlsafe(48))'` et placez le résultat après `JWT_SECRET=` dans `backend/.env`.
+3. Depuis le dossier contenant `pubspec.yaml`, chargez explicitement les variables puis lancez le serveur :
+
+```bash
+set -a
+source backend/.env
+set +a
+python3 backend/server.py
+```
+
+Ces commandes supposent Bash. Le serveur ne lit pas le fichier `.env` lui-même. `backend/.env` est ignoré par Git ; il doit rester local. `DATABASE_PATH` est relatif au dossier de lancement : conservez le même chemin pour retrouver les comptes et les sessions. Au premier démarrage, le serveur crée les tables et importe `seed.json` ; aux suivants, les lignes existantes sont conservées. Les tests utilisent une base temporaire distincte et n’effacent pas la base de développement.
+
 ## Architecture
 
 ```text
@@ -118,7 +139,8 @@ lib/
   domain/models.dart        Entités Entry/Feed, erreurs et contrats abstraits
   data/storage.dart         Adaptateurs Hive et stockage sécurisé
   data/repositories.dart    Repositories d’authentification et de contenu
-  presentation/app.dart     Formulaires, navigation, listes et détail
+  presentation/controllers.dart  État de session et de chargement avec ChangeNotifier
+  presentation/app.dart     Widgets et injection Provider : formulaires, listes et détail
   main.dart                 Initialisation et injection des dépendances
 backend/
   server.py                 API HTTP, JWT HS256, sessions et SQLite
@@ -126,9 +148,13 @@ backend/
   test_api.py               Tests de bout en bout HTTP
 ```
 
-Séparation `data / domain / presentation`. Les écrans de contenu dépendent du contrat `ContentRepository` ; `main.dart` injecte `RestContentRepository`. Les repositories portent l’accès réseau et les règles de cache, sans dépendre des widgets. `SessionStore` et `FeedCache` sont substituables dans les tests. L’état de présentation utilise `StatefulWidget` pour limiter les dépendances.
+Séparation `data / domain / presentation`. Les écrans de contenu dépendent du contrat `ContentRepository` ; `main.dart` injecte `RestContentRepository`. Les repositories portent l’accès réseau et les règles de cache, sans dépendre des widgets. `SessionStore` et `FeedCache` sont substituables dans les tests. L’état métier de présentation utilise **Provider + ChangeNotifier** : `AuthController` porte la session, l’authentification en cours et les erreurs ; chaque rubrique possède un `FeedController` pour les données, le chargement et les erreurs. Les widgets observent ces contrôleurs via `watch`/`select` et déclenchent les actions via `read`. Les contrôleurs dépendent uniquement des contrats du domaine et sont testables sans widgets. Provider gère leur destruction ; les réponses tardives sont ignorées après destruction et les actualisations simultanées partagent une seule requête.
 
-Le chargement suit **réseau → stockage local → affichage**. En cas d’indisponibilité réseau ou de serveur 5xx, le repository lit la dernière copie Hive. Le cache ne masque jamais une réponse 401/403 ni un format de données invalide. Les trois rubriques sont préchargées à l’ouverture de l’espace connecté. Le détail réutilise l’entité reçue et fonctionne donc aussi hors ligne.
+`StatefulWidget` reste réservé à l’état local d’interface : contrôleurs de champs, visibilité du mot de passe, sélection d’un onglet et clé du messager. Les appels d’authentification et de chargement ne sont plus pilotés par `setState`. Voir la [documentation officielle de Provider](https://pub.dev/packages/provider).
+
+Le chargement suit **réseau → stockage local → affichage**. En cas d’indisponibilité réseau ou de serveur 5xx, le repository lit la dernière copie Hive. Le cache ne masque jamais une réponse 401/403 ni un format de données invalide. Les erreurs exposées par les repositories portent un `FailureKind` : réseau, session expirée, accès interdit, réponse invalide, stockage ou erreur non classée. Un cache corrompu ou inaccessible produit un message explicite. Une erreur d’écriture empêche d’annoncer une synchronisation réussie. Les sessions reçues sont validées avant sauvegarde ; le refresh ne peut pas remplacer le compte courant. La déconnexion tente d’effacer le cache même si l’effacement du stockage sécurisé échoue, et signale tout nettoyage incomplet.
+
+Les trois rubriques sont préchargées à l’ouverture de l’espace connecté. Le détail réutilise l’entité reçue et fonctionne donc aussi hors ligne.
 
 Les fichiers Hive et les clés de session sont séparés par URL d’API ; à l’intérieur d’une boîte Hive, les données sont séparées par identifiant utilisateur (`userId/category`). Changer de serveur ou utiliser cette nouvelle version impose donc une connexion propre, sans réutiliser les tokens d’une autre API.
 
@@ -199,6 +225,13 @@ Pour tester uniquement les formulaires et leurs interactions :
 flutter test test/auth_widget_test.dart
 ```
 
+Pour vérifier les repositories et les contrôleurs indépendamment des écrans :
+
+```bash
+flutter test test/repository_test.dart test/repository_resilience_test.dart
+flutter test test/controllers_test.dart
+```
+
 ### Vérifications complètes, couverture et compilation Android
 
 Après `flutter pub get`, exécutez les commandes suivantes. La dernière commande nécessite l’environnement Android indiqué dans les prérequis ; l’APK obtenu se trouve dans `build/app/outputs/flutter-apk/app-debug.apk`.
@@ -207,7 +240,7 @@ Après `flutter pub get`, exécutez les commandes suivantes. La dernière comman
 dart format --output=none --set-exit-if-changed lib test scripts
 flutter analyze
 flutter test --coverage --concurrency=2
-python3 scripts/check_coverage.py
+python3 scripts/check_coverage.py --min-total 80
 python3 -m unittest discover -s backend -v
 flutter build apk --debug
 ```
@@ -215,6 +248,8 @@ flutter build apk --debug
 | Fichier | Ce qu’il vérifie |
 | --- | --- |
 | [`repository_test.dart`](test/repository_test.dart) | 10 tests : accès REST, écriture/lecture du cache, panne sans cache, isolation entre comptes, 401 non masqué, repli 503, inscription, logout hors ligne, refresh concurrent et arrêt après refresh refusé |
+| [`repository_resilience_test.dart`](test/repository_resilience_test.dart) | Réponses invalides, refus 403, cache corrompu, panne du stockage sécurisé, nettoyage après échec, refresh hors ligne, refresh tardif et changement de compte interdit |
+| [`controllers_test.dart`](test/controllers_test.dart) | États Provider/ChangeNotifier : chargement, erreur, retry, double soumission, déconnexion hors ligne et réponses après destruction |
 | [`cache_persistence_test.dart`](test/cache_persistence_test.dart) | 2 tests utilisant de **vraies boîtes Hive sur disque** : réouverture hors ligne, conservation de la date, isolation et effacement après logout |
 | [`auth_widget_test.dart`](test/auth_widget_test.dart) | 4 tests de widgets : validation des formulaires, erreur de connexion puis réussite, inscription/navigation/logout, bouton Réessayer après une panne |
 | [`widget_test.dart`](test/widget_test.dart) | Navigation entre les trois rubriques, bandeau hors ligne et détail au format téléphone |
@@ -225,21 +260,40 @@ Le test de bout en bout utilise l’adaptateur de test officiel pour Keychain/Ke
 
 ### Couverture mesurée et CI
 
-Résultats exécutés le 13 septembre 2026 : **18 tests Flutter réussis**, **3 tests HTTP Python réussis**, analyse Flutter sans problème.
+Résultats exécutés le 27 septembre 2026 : **40 tests Flutter réussis**, **3 tests HTTP Python réussis**, analyse Flutter sans problème.
 
 | Couche | Lignes couvertes / instrumentées | Couverture |
 | --- | --- | --- |
-| `core` | 36 / 43 | 83,7 % |
-| `data` | 52 / 62 | 83,9 % |
-| `domain` | 12 / 15 | 80,0 % |
-| `presentation` | 225 / 231 | 97,4 % |
-| **Total instrumenté** | **325 / 351** | **92,6 %** |
+| `core` | 39 / 45 | 86,7 % |
+| `data` | 59 / 65 | 90,8 % |
+| `domain` | 22 / 24 | 91,7 % |
+| `presentation` (widgets et contrôleurs) | 262 / 268 | 97,8 % |
+| **Total instrumenté** | **382 / 402** | **95,0 %** |
 
-Le bootstrap natif `main.dart` n’est pas inclus dans ce total. Ces chiffres proviennent de LCOV et sont reproductibles avec les commandes ci-dessus ; la CI publie son propre rapport pour chaque commit.
+Le bootstrap natif `main.dart` n’est pas inclus dans ce total. Ces chiffres proviennent du rapport LCOV local ; les commandes ci-dessus permettent de recalculer les valeurs sur la version évaluée ; la CI publie son propre rapport pour chaque commit.
 
 `flutter test --coverage` produit `coverage/lcov.info`. `scripts/check_coverage.py` affiche les lignes couvertes par couche et le total des fichiers instrumentés ; ce pourcentage mesure la couverture des lignes, pas toutes les branches ni une garantie d’absence de bugs. Le démarrage natif et la signature iOS restent à vérifier sur appareil.
 
-[GitHub Actions](https://github.com/jkatems/nextflutter_connected_app/actions/workflows/ci.yml) exécute le formatage, l’analyse, les tests Flutter avec couverture et les tests HTTP Python à chaque push/PR. Le rapport LCOV est téléchargeable dans l’artefact **flutter-coverage** du run. Les résultats doivent correspondre au commit évalué : consulter uniquement des extraits de `lib/` ne montre pas les tests présents dans `test/`.
+[GitHub Actions](https://github.com/jkatems/nextflutter_connected_app/actions/workflows/ci.yml) exécute le formatage, l’analyse, les tests Flutter avec couverture et les tests HTTP Python à chaque push/PR et sur déclenchement manuel. Le rapport LCOV est téléchargeable dans l’artefact **flutter-coverage** du run. Les résultats doivent correspondre au commit évalué : consulter uniquement des extraits de `lib/` ne montre pas les tests présents dans `test/`.
+
+### Pipeline CI et livraison Android
+
+Le workflow est versionné dans [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+
+| Étape | Contrôle ou résultat |
+| --- | --- |
+| Environnement | Ubuntu, Flutter 3.41.9, Python 3.14 ; Java 17 pour le job Android |
+| Dépendances | `flutter pub get --enforce-lockfile` utilise les versions verrouillées dans `pubspec.lock` |
+| Qualité | Formatage Dart puis analyse statique ; un échec arrête le job |
+| Tests | Repositories, contrôleurs, widgets, Hive sur disque, intégration Flutter/API réelle et tests HTTP Python |
+| Couverture | `python scripts/check_coverage.py --min-total 80` impose 80 % des lignes instrumentées ; rapport absent ou vide refusé |
+| Rapport | Artefact `flutter-coverage` contenant `lcov.info`, téléversé même si une étape ultérieure échoue, lorsqu’il existe |
+| Compilation | Le job `android` démarre uniquement après réussite du job `test` et compile un APK debug |
+| Livraison | Artefact `carnet-android-debug` téléchargeable depuis le run GitHub Actions |
+
+Aucun secret GitHub n’est nécessaire pour ces tests : ils génèrent leurs propres sessions et utilisent des serveurs locaux temporaires. L’APK CI cible `http://10.0.2.2:8000` et sert à une démonstration sur émulateur avec le backend démarré sur l’hôte. Pour un téléphone ou une API hébergée, reconstruisez avec l’URL adaptée.
+
+La livraison est un **artefact de démonstration**, pas une publication automatique sur un store ni un déploiement de l’API. La mise en production reste manuelle : héberger le backend avec HTTPS, conserver son secret et son volume SQLite, puis compiler un client avec l’URL HTTPS et une signature de production. Aucun résultat de pipeline distant n’est présumé réussi avant son exécution sur GitHub.
 
 ### Essai du mode hors ligne
 

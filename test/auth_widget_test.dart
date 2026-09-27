@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:carnet/presentation/controllers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:carnet/domain/models.dart';
 import 'package:carnet/presentation/app.dart';
@@ -67,7 +69,10 @@ void main() {
     final auth = FakeAuth();
     await tester.pumpWidget(
       MaterialApp(
-        home: AuthScreen(auth: auth, onSession: (_) {}),
+        home: ChangeNotifierProvider(
+          create: (_) => AuthController(auth),
+          child: const AuthScreen(),
+        ),
       ),
     );
     await tester.ensureVisible(find.text('Se connecter'));
@@ -81,10 +86,14 @@ void main() {
     tester,
   ) async {
     final auth = FakeAuth()..reject = true;
-    Map<String, dynamic>? session;
+    final controller = AuthController(auth);
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
-        home: AuthScreen(auth: auth, onSession: (s) => session = s),
+        home: ChangeNotifierProvider.value(
+          value: controller,
+          child: const AuthScreen(),
+        ),
       ),
     );
     await fill(tester);
@@ -92,12 +101,12 @@ void main() {
     await tester.tap(find.text('Se connecter'));
     await tester.pumpAndSettle();
     expect(find.text('Email ou mot de passe incorrect.'), findsOneWidget);
-    expect(session, isNull);
+    expect(controller.session, isNull);
     auth.reject = false;
     await tester.ensureVisible(find.text('Se connecter'));
     await tester.tap(find.text('Se connecter'));
     await tester.pumpAndSettle();
-    expect(session!['user']['id'], 7);
+    expect(controller.session!['user']['id'], 7);
     expect(auth.attempts, 2);
   });
   testWidgets('registration sends name and opens authenticated navigation', (

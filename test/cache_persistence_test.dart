@@ -6,7 +6,7 @@ import 'package:carnet/core/api_client.dart';
 import 'package:carnet/data/repositories.dart';
 import 'package:carnet/data/storage.dart';
 import 'package:carnet/domain/models.dart';
-import 'repository_test.dart' show Adapter, MemorySession, response, item;
+import 'support/doubles.dart' show Adapter, MemorySession, response, item;
 
 void main() {
   late Directory directory;

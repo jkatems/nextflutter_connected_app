@@ -14,11 +14,19 @@ AppFailure networkFailure(DioException e) {
   if (e.response?.statusCode == 401) {
     return const AppFailure(
       'Session expirée. Déconnectez-vous puis reconnectez-vous.',
+      kind: FailureKind.unauthorized,
+    );
+  }
+  if (e.response?.statusCode == 403) {
+    return const AppFailure(
+      'Vous n’avez pas accès à cette ressource.',
+      kind: FailureKind.forbidden,
     );
   }
   if (isUnavailable(e)) {
     return const AppFailure(
       'Connexion impossible. Vérifiez votre réseau ou réessayez plus tard.',
+      kind: FailureKind.network,
     );
   }
   final data = e.response?.data;
@@ -75,7 +83,10 @@ class AuthInterceptor extends Interceptor {
     if (current == null || current['refreshToken'] != old['refreshToken']) {
       throw const AppFailure('Session modifiée.');
     }
-    final next = response.data!;
+    final next = parseSession(response.data);
+    if (next['user']['id'] != old['user']['id']) {
+      throw const AppFailure('La session reçue appartient à un autre compte.');
+    }
     await sessions.write(next);
     return next;
   }
